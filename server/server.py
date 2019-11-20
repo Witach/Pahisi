@@ -11,7 +11,7 @@ from PyQt5.QtCore import *
 class MyMainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
-        self.setWindowIcon(QIcon('server.png'))
+        self.setWindowIcon(QIcon('resources/server.png'))
         self.title = 'Mensch ärgere Dich nicht'
         self.left = 200
         self.top = 40
