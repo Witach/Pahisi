@@ -16,7 +16,7 @@ class MyMainWindow(QMainWindow):
     left = 200
     top = 40
     width = 350
-    height = 400
+    height = 600
     screenHeight = 1080
     screenWidth = 1920
 

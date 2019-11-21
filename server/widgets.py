@@ -1,11 +1,12 @@
 from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-
+from datetime import datetime
 
 class Widgets(QWidget):
     numberOfPlayers = 2
     port = 6669
+    startedPivot = False
 
     def __init__(self):
         super().__init__()
@@ -35,6 +36,7 @@ class Widgets(QWidget):
         
     def loadFileIntoMovie(self,filename):
         movie = QMovie(filename, QByteArray(), self)
+
         movie.setScaledSize(QSize().scaled(200,200,Qt.KeepAspectRatio))
         return movie
         
@@ -55,13 +57,13 @@ class Widgets(QWidget):
         
 
     def createMainVerticaLList(self, splitter,movie):
-        textBoxLogs = QTextEdit(self)
-        textBoxLogs.setReadOnly(True)
+        self.textBoxLogs = QTextEdit(self)
+        self.textBoxLogs.setReadOnly(True)
         mainVerticalList = QVBoxLayout()
         mainVerticalList.addWidget(movie)
         mainVerticalList.addLayout(splitter)
-        mainVerticalList.addWidget(QPushButton('Start'))
-        mainVerticalList.addWidget(textBoxLogs)
+        mainVerticalList.addWidget(self.createStart(self.startServer,'Start'))
+        mainVerticalList.addWidget(self.textBoxLogs)
         return mainVerticalList
 
     def createInteractBox(self, textVBox, playerHBox):
@@ -69,9 +71,9 @@ class Widgets(QWidget):
         splitter = QHBoxLayout()
         splitter.addLayout(textVBox)
         splitter.addLayout(interactVBox)
-        textBoxPort = QLineEdit(self)
-        textBoxPort.setText(str(self.port))
-        interactVBox.addWidget(textBoxPort)
+        self.textBoxPort = QLineEdit(self)
+        self.textBoxPort.setText(str(self.port))
+        interactVBox.addWidget(self.textBoxPort)
         interactVBox.addLayout(playerHBox)
         return splitter
 
@@ -94,6 +96,10 @@ class Widgets(QWidget):
         button.setMaximumWidth(maxWidth)
         button.setMinimumWidth(minWidth)
         return button
+    def createStart(self, method, name):
+        button = QPushButton(name)
+        button.clicked.connect(method)
+        return button
 
     def iniTextBoxOfPlayers(self):
         self.textBoxPlayers = QTextEdit(self)
@@ -103,14 +109,15 @@ class Widgets(QWidget):
         self.textBoxPlayers.setMaximumWidth(30)
         self.textBoxPlayers.setText('  ' + str(self.numberOfPlayers))
 
-    def fileTreeBuilder(self):
-        tree = QTreeView()
-        tree.setModel(self.model)
-        tree.setAnimated(True)
-        tree.setIndentation(20)
-        tree.setSortingEnabled(True)
-        tree.resize(640, 480)
-        return tree
+    
+    def startServer(self):
+        if not self.startedPivot:
+            self.textBoxLogs.setText('Server service started at ' + str(datetime.now().strftime("%d.%m.%Y %H:%M:%S")))
+            self.textBoxLogs.append('Server is started at port = ' + str(self.textBoxPort.text()))
+            self.textBoxLogs.append('number of players = ' + str(self.numberOfPlayers))
+            self.startedPivot = True
+        
+        
 
     def increment(self):
         if self.numberOfPlayers < 4:
