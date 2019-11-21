@@ -14,7 +14,7 @@ class Widgets(QWidget):
         self.initUI()
 
     def initUI(self):
-
+        
      
         
         textVBox = self.createTextVBox('set IP:', 'set port:')
@@ -57,7 +57,7 @@ class Widgets(QWidget):
         
         mainVerticalList = QVBoxLayout()
         mainVerticalList.setContentsMargins(25,40,25,40)
-        mainVerticalList.setSpacing(7)
+        mainVerticalList.setSpacing(12)
         
         mainVerticalList.addWidget(self.setImage(path))
         mainVerticalList.addLayout(splitter)
@@ -78,12 +78,13 @@ class Widgets(QWidget):
     def createInteractBox(self, textVBox):
         interactVBox = QVBoxLayout()
         splitter = QHBoxLayout()
+        
         splitter.addLayout(textVBox)
         splitter.addLayout(interactVBox)
         self.textBoxPort = QLineEdit(self)
-        self.textBoxPort.setStyleSheet("QLineEdit {font-size: 15px;font-family: Arial;padding: 5px 5px 5px 5px;}")
+        self.textBoxPort.setStyleSheet("QLineEdit {color: white;background-color:#151515;border-style: outset;border-radius: 10px;font-size: 15px;font-family: Arial;font-weight: bold;padding: 5px 5px 5px 5px;}")
         self.textBoxAdress = QLineEdit(self)
-        self.textBoxAdress.setStyleSheet("QLineEdit {font-size: 15px;font-family: Arial;padding: 5px 5px 5px 5px;}")
+        self.textBoxAdress.setStyleSheet("QLineEdit {color: white;background-color:#151515;border-style: outset;border-radius: 10px;font-size: 15px;font-family: Arial;font-weight: bold;padding: 5px 5px 5px 5px;}")
         self.textBoxPort.setText(str(self.port))
         self.textBoxAdress.setText(str(self.adress))
         
@@ -103,8 +104,8 @@ class Widgets(QWidget):
         textVBox = QVBoxLayout()
         l1 = QLabel(portText)
         l2 = QLabel(playerText)
-        l1.setStyleSheet("QLabel {font-size: 15px;font-family: Arial;padding: 5px 5px 5px 5px;}")
-        l2.setStyleSheet("QLabel {font-size: 15px;font-family: Arial;padding: 5px 5px 5px 5px;}")
+        l1.setStyleSheet("QLabel {color: white;background-color:#151515;border-style: outset;border-radius: 10px;font-size: 15px;font-family: Arial;font-weight: bold;padding: 5px 5px 5px 5px;}")
+        l2.setStyleSheet("QLabel {color: white;background-color:#151515;border-style: outset;border-radius: 10px;font-size: 15px;font-family: Arial;font-weight: bold;padding: 5px 5px 5px 5px;}")
         textVBox.addWidget(l1)
         textVBox.addWidget(l2)
         return textVBox
@@ -119,7 +120,7 @@ class Widgets(QWidget):
         button = QPushButton(name)
        
         #button.setContentsMargins(10,30,30,30)
-        button.setStyleSheet("QPushButton {font-size: 25px;font-family: Arial;padding: 10px 5px 10px 5px;}")
+        button.setStyleSheet("QPushButton {font-size: 25px;color: white;background-color:#151515;border-style: outset;border-radius: 15px;font-family: Arial;padding: 10px 5px 10px 5px;}QPushButton:hover:!pressed {background-color: #2A2A2A;}")
         button.clicked.connect(method)
         return button
     def startGame(self):

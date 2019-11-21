@@ -17,10 +17,12 @@ class MyMainWindow(QMainWindow):
 
     def __init__(self, parent=None):
         super().__init__(parent)
+        
         self.setWindowIcon(QIcon('client/resources/dice.png'))
         self.widgets = Widgets()
         self.setCentralWidget(self.widgets)
         self.initUIMainWindow()
+        
 
     def initUIMainWindow(self):
         self.setWindowTitle(self.title)
@@ -31,4 +33,4 @@ class MyMainWindow(QMainWindow):
             math.floor(self.screenWidth / 2 - self.height),
             math.floor(self.screenHeight / 2 -400)
         )
-
+        
