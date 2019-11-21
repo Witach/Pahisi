@@ -36,16 +36,8 @@ class Widgets(QWidget):
 
     def __init__(self):
         super().__init__()
+        self.numberOfPlayers = 2
         self.initUI()
-
-    def fileTreeBuilder(self):
-        tree = QTreeView()
-        tree.setModel(self.model)
-        tree.setAnimated(True)
-        tree.setIndentation(20)
-        tree.setSortingEnabled(True)
-        tree.resize(640, 480)
-        return tree
 
     def increment(self):
         if self.numberOfPlayers < 4:
@@ -58,10 +50,25 @@ class Widgets(QWidget):
     
 
     def initUI(self):
-        self.numberOfPlayers = 2
+        
         mainVerticalList = QVBoxLayout()
+        
+        self.image = QImage('resources/pawn.png')
+        #image2 = self.image.scaledToWidth(300)
+        image3 = self.image.scaled(250,250)
+        self.image = image3
+        self.label = QLabel('Hello')
+        self.label.setGeometry(50,20,200,200)
+        
+        self.label.setPixmap(QPixmap.fromImage(self.image))
+        self.label.setScaledContents(False)
+        self.label.setAlignment(Qt.AlignCenter)
+        self.label.setStyleSheet("QLabel {padding: 20px 0px 20px 0px;}")
+        mainVerticalList.addWidget(self.label)
+        
         labelport = QLabel('set port:')
         labelplayers = QLabel('set players:')
+        
         
         textBoxPort = QLineEdit(self)
         self.port = 6669
@@ -72,7 +79,7 @@ class Widgets(QWidget):
         self.textBoxPlayers = QTextEdit(self)
         self.textBoxPlayers.setReadOnly(True)
         self.textBoxPlayers.setMinimumHeight(10)
-        self.textBoxPlayers.setMaximumHeight(25)
+        self.textBoxPlayers.setMaximumHeight(23)
         self.textBoxPlayers.setMaximumWidth(30)
         
         self.textBoxPlayers.setText('  ' + str(self.numberOfPlayers))
@@ -91,7 +98,7 @@ class Widgets(QWidget):
         buttonIncriment.setMaximumWidth(50)
         buttonIncriment.setMinimumWidth(25)
         buttonStart = QPushButton('Start')
-        
+        buttonStart.setMinimumHeight(30)
         
         
         splitter = QHBoxLayout()
