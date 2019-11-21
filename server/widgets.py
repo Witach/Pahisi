@@ -23,7 +23,7 @@ class Widgets(QWidget):
         playerHBox = self.createPlayerHbox(buttonDicriment, buttonIncriment)
 
         splitter = self.createInteractBox(textVBox, playerHBox)
-        movie =  self.createLabelGif('server/resources/server.gif',100)
+        movie =  self.createLabelGif('server/resources/server.gif',75)
         mainVerticalList = self.createMainVerticaLList(splitter,movie)
 
         self.setLayout(mainVerticalList)
@@ -112,9 +112,9 @@ class Widgets(QWidget):
     
     def startServer(self):
         if not self.startedPivot:
-            self.textBoxLogs.setText('Server service started at ' + str(datetime.now().strftime("%d.%m.%Y %H:%M:%S")))
-            self.textBoxLogs.append('Server is started at port = ' + str(self.textBoxPort.text()))
-            self.textBoxLogs.append('number of players = ' + str(self.numberOfPlayers))
+            self.textBoxLogs.setText(str(datetime.now().strftime("%d.%m.%Y %H:%M:%S:")) + ' Server service started' )
+            self.textBoxLogs.append(str(datetime.now().strftime("%d.%m.%Y %H:%M:%S:")) +  ' Server is started at port = ' + str(self.textBoxPort.text()))
+            self.textBoxLogs.append(str(datetime.now().strftime("%d.%m.%Y %H:%M:%S:")) + ' number of players = ' + str(self.numberOfPlayers))
             self.startedPivot = True
         
         
