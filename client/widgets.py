@@ -2,14 +2,17 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from datetime import datetime
-
+from win32api import GetSystemMetrics
+from client.game.Game import Scene
 class Widgets(QWidget):
     numberOfPlayers = 2
     port = 6669
     startedPivot = False
     adress = '127.0.0.1'
+    
 
-    def __init__(self):
+    def __init__(self,parent=None):
+        self.parent =  parent
         super().__init__()
         self.initUI()
 
@@ -68,13 +71,15 @@ class Widgets(QWidget):
         label = QLabel(self)
         Image = QImage(path)
         
-        label.setPixmap(QPixmap.fromImage(Image.scaled(300,300)))
+        label.setPixmap(QPixmap.fromImage(Image))
         label.setScaledContents(False)
         
         label.setAlignment(Qt.AlignCenter)
-        label.setStyleSheet("QLabel {padding: 30px 30px 30px 30px;}")
+        label.setStyleSheet("QLabel {padding: 30px 30px 30px 30px}")
         return label
-
+  
+        
+    
     def createInteractBox(self, textVBox):
         interactVBox = QVBoxLayout()
         splitter = QHBoxLayout()
@@ -124,7 +129,18 @@ class Widgets(QWidget):
         button.clicked.connect(method)
         return button
     def startGame(self):
-        print('start!')
+        screenWidth = (int)(GetSystemMetrics(1) -  0.08*GetSystemMetrics(1))
+        self.parent.move((int)(GetSystemMetrics(1)/2),0)
+        self.close()
+        nowy widget
+        ##TODO staff like connection with server checking
+        #self.game = Scene(self.parent)
+        
+        self.parent.resize(screenWidth,screenWidth)
+        
+        
+        
+        
    
 
     

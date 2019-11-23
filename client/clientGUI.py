@@ -19,14 +19,14 @@ class MyMainWindow(QMainWindow):
         super().__init__(parent)
         
         self.setWindowIcon(QIcon('client/resources/dice.png'))
-        self.widgets = Widgets()
+        self.widgets = Widgets(self)
         self.setCentralWidget(self.widgets)
         self.initUIMainWindow()
         
 
     def initUIMainWindow(self):
         self.setWindowTitle(self.title)
-
+        
         self.setGeometry(self.left, self.top, self.width, self.height)
 
         self.move(
