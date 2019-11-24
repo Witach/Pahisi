@@ -18,14 +18,31 @@ class GamePanel(QWidget):
     blue = 2
     green = 3
     yellow= 4
-    redPawnsStartingPosition = [[22,26],[110,24],[110,104],[22,108]]
-    bluePawnsStartingPosition = [[788,22],[880,22],[880,102],[790,104]]
-    greenPawnsStartingPosition = [[880,798],[880 ,892],[792 ,890],[792 ,800]]
-    yellowPawnsStartingPosition = [[108 ,888],[24,890],[22,794],[110,794]]
-    redPawns = []
-    bluePawns = []
-    greenPawns = []
-    yellowPawns = []
+    #Coordinates
+    redPawnsStartingPositionsCoordinates = [[22,26],[110,24],[110,104],[22,108]]
+    bluePawnsStartingPositionsCoordinates = [[788,22],[880,22],[880,102],[790,104]]
+    greenPawnsStartingPositionsCoordinates = [[880,798],[880 ,892],[792 ,890],[792 ,800]]
+    yellowPawnsStartingPositionsCoordinates = [[108 ,888],[24,890],[22,794],[110,794]]
+    
+    starterPositionsCoordinates = [[24,370],[544,22],[880,544],[366,882]]
+    milieusPositions = [[24,370],[98,370],[182,370],[264,370],[366,366],[366,278],
+                        [366,192],[366,104],[366,28],[456,24],[544,22],[544,102],
+                        [544,184],[544,266],[544,362],[622,366],[708,366],[796,366],
+                        [880,366],[880,456],[880,542],[798,544],[710,544],[622,544],
+                        [544,544],[544,626],[544,708],[544,790],[544,886],[458,886],
+                        [368,882],[368,800],[368,714],[368,626],[368,544],[266,540],
+                        [182,540],[100,540],[26,540],[26,460]]
+    #lists of labels
+    redPawnsStartingPosiotions = []
+    bluePawnsStartingPosiotions = []
+    greenPawnsStartingPosiotions = []
+    yellowPawnsStartingPosiotions = []
+    
+    starterPositions = []
+    #surroundings layer
+    milieusPositions = []
+    winnerPositions = [[]]
+    
     
     ##place for more positions
     
@@ -39,48 +56,100 @@ class GamePanel(QWidget):
        
        self.initScreenSize()
        self.initBackground(993,'resources/wait.jpg')
+       
+       
        self.show()
-       
-       
        self.waitForPlayers()
-       self.close()#bardzo wazne
        self.init()
-       self.show()
-       
+       self.gameStart()
+      
        
        
     
+    
        
+    
+        
     def waitForPlayers(self):
         
-        for n in range(1):
+        for n in range(20):
             QApplication.processEvents()
             time.sleep(0.1)
         #if statement needed, when server collected all players (OK TRUE)
         
         
     def init(self,path="resources/table.png"):
-       
-       #print(str(screenWidth))
-       print(path)
+        
        self.initScreenSize()
        self.initBackground(993,path)
-       #gameInitial
-       self.setPawnsOnStartingPosiotions()
-       
+       self.setAllPawnsPosiotions()
+       self.setPawnsImages()
+    
+    def setAllPawnsPosiotions(self):
+        self.createPawnPosiotions(self.redPawnsStartingPositionsCoordinates,self.redPawnsStartingPosiotions)
+        self.createPawnPosiotions(self.bluePawnsStartingPositionsCoordinates,self.bluePawnsStartingPosiotions)
+        self.createPawnPosiotions(self.greenPawnsStartingPositionsCoordinates,self.greenPawnsStartingPosiotions)
+        self.createPawnPosiotions(self.yellowPawnsStartingPositionsCoordinates,self.yellowPawnsStartingPosiotions)
+        
+        
+        ##TODO REST OF POSISTIONS
+        
+    def setPawnsImages(self):
+        self.redPawnImage = self.createPawn('resources/redPawn.png')
+        self.bluePawnImage = self.createPawn('resources/bluePawn.png')
+        self.greenPawnImage = self.createPawn('resources/greenPawn.png')
+        self.yellowPawnImage = self.createPawn('resources/yellowPawn.png')
+        
+    def gameStart(self):
+        #asking server about players roles and quantity
+        self.setPawnsOnStartingPosiotions()
+        #rest of game
+        
+        
+        
+        
+        
     def setPawnsOnStartingPosiotions(self):
         rolesArray = self.getPlayersRoles()
         for i in rolesArray:
             if i == self.red:
-                self.createPawns(self.redPawnsStartingPosition,'resources/redPawn.png',self.redPawns)
+                for i in self.redPawnsStartingPosiotions:
+                    self.setPawnOnPosition(i,self.redPawnImage)
             if i == self.blue:
-                self.createPawns(self.bluePawnsStartingPosition,'resources/bluePawn.png',self.bluePawns)
+                for i in self.bluePawnsStartingPosiotions:
+                    self.setPawnOnPosition(i,self.bluePawnImage)
             if i == self.green:
-                self.createPawns(self.greenPawnsStartingPosition,'resources/greenPawn.png',self.greenPawns)
+                for i in self.greenPawnsStartingPosiotions:
+                    self.setPawnOnPosition(i,self.greenPawnImage)
             if i == self.yellow:
-                self.createPawns(self.yellowPawnsStartingPosition,'resources/yellowPawn.png',self.yellowPawns)
+                for i in self.yellowPawnsStartingPosiotions:
+                    self.setPawnOnPosition(i,self.yellowPawnImage)      
+    
+    def createPawnPosiotions(self,coordinates,posiotions):
+       
+        j = 0
+        for i in coordinates:
+            posiotions.append(QLabel(self))
+            posiotions[j].move(i[0], i[1])
+            j+=1
+            
+    def setPawnOnPosition(self,position,pawn): 
+        """
+            Position is a label 
+            pawn is scaled picture 
+        """
+        position.setPixmap(QPixmap.fromImage(pawn))
+        position.setScaledContents(False)
+        position.setVisible(True)
+        position.setAlignment(Qt.AlignCenter)
+        
     
         
+    def createPawn(self,path):
+        Image = QImage(path)
+        Image = Image.scaled(75,75)
+        return Image
+    
     def getPlayersRoles(self):
         """
             bierze od servera kolory innych graczy
@@ -90,29 +159,25 @@ class GamePanel(QWidget):
             4 - zolty
             moglyby to byc enum ale dzialaloby to tak samo plus nie chce mi sie tego ogarniac w pythonie XD
         """ 
-        tempArray = [1,2,3,4]
+        tempArray = [1,2,3]
         return tempArray
-    def createPawns(self,position,path,pawns):
-        """
-            wazne jest aby zapamietac obrazki pionkow bardzo wazne
-        """
-        j = 0
-        for i in position:
-            pawns.append(self.createImage(path))
-            pawns[j].move(i[0],i[1])
-            j+=1
+    
         
+    """
     def createImage(self,path):
         label = QLabel(self)
         Image = QImage(path)
         
         label.setPixmap(QPixmap.fromImage(Image.scaled(75,75)))
         label.setScaledContents(False)
+        label.setVisible(False)
         
         label.setAlignment(Qt.AlignCenter)
+    
         
     
-        return label    
+        return label   
+    """
     #Screen Settings   
     def initScreenSize(self):
        
