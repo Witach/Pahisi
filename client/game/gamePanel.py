@@ -5,96 +5,135 @@ from PyQt5.QtWidgets import *
 from win32api import GetSystemMetrics
 import time
 import threading
+import math
+
+
 class GamePanel(QWidget):
     port = 6669
     connected = True
     ipAdress = '127.0.0.1'
+    role = 1 # colour of client
     
-    def __init__(self,app,ipAdress = '127.0.0.1',port = 6669):
+    red = 1
+    blue = 2
+    green = 3
+    yellow= 4
+    oLayout = QVBoxLayout()
+    redPawnsStartingPosition = [[22,26],[110,24],[110,104],[22,108]]
+    bluePawnsStartingPosition = [[788,22],[880,22],[880,102],[790,104]]
+    ##place for more positions
+    
+    def __init__(self,parent,ipAdress = '127.0.0.1',port = 6669):
        super().__init__()
-       app.setStyleSheet('QWidget{background-color:black;}')
+       
        self.port = port
        self.ipAdress = ipAdress
        ##GIF WAITING staff
-       self.initGifWaiting()
-       ##WAITING FOR CONNECTION THREAD
-       x = threading.Thread(target=self.waitingForConnection, args=())
-       x.start()
+       
+       ##WAITING FOR CONNECTION THREAD IF CONNECTED THEN START GAME
+       #x = threading.Thread(target=self.waitingForConnection, args=())
+       #x.start()
+       ## CREATE THREAD LOADING STAGE ☼
+       self.initScreenSize()
+       self.initBackground(993,'resources/wait.jpg')
+       self.show()
+       
+       #parent.setCentralWidget(self)
+       self.waitForPlayers()
+       self.close()
+       self.init()
        
        self.show()
-    def initGifWaiting(self):
-        self.initScreenSize()
-        self.movie =  self.createLabelGif('resources/waiting.gif',75)
-        self.oLayout = QVBoxLayout()
-        self.oLayout.addWidget(self.movie)
-        self.setLayout(self.oLayout)
-    def init(self):
-       screenWidth = self.initScreenSize()
-       self.initBackground(screenWidth)
+       
+       
+       
+       
+    
+       
+    def waitForPlayers(self):
+        
+        for n in range(50):
+            QApplication.processEvents()
+            time.sleep(0.1)
+        #if statement needed, when server collected all players (OK TRUE)
+        
+        
+    def init(self,path="resources/table.png"):
+       
+       #print(str(screenWidth))
+       print(path)
+       self.initScreenSize()
+       self.initBackground(993,path)
+       #gameInitial
+       self.setPawnsOnStartingPosiotions()
+       
+    def setPawnsOnStartingPosiotions(self):
+        rolesArray = self.getPlayersRoles()
+        for i in rolesArray:
+            if i == self.red:
+                self.createPawns(self.redPawnsStartingPosition,'resources/redPawn.png')
+            if i == self.blue:
+                print('2')
+            if i == self.green:
+                print('3')
+            if i == self.yellow:
+                print('4')
+    
+        
+    def getPlayersRoles(self):
+        """
+            bierze od servera kolory innych graczy
+            1 - czerwony
+            2 - niebieski
+            3 - zielony
+            4 - zolty
+            moglyby to byc enum ale dzialaloby to tak samo plus nie chce mi sie tego ogarniac w pythonie XD
+        """ 
+        tempArray = [1,2]
+        return tempArray
+    def createPawns(self,position,path):
+        """
+            wazne jest aby zapamietac obrazki pionkow bardzo wazne
+        """
+        for i in position:
+            image = self.createImage(path)
+            self.oLayout.addWidget(image)
+            print(str(i[0])+str(i[1]))
+            image.move(i[0],i[1])
+        
+    def createImage(self,path):
+        label = QLabel(self)
+        Image = QImage(path)
+        
+        label.setPixmap(QPixmap.fromImage(Image.scaled(75,75)))
+        label.setScaledContents(False)
+        
+        label.setAlignment(Qt.AlignCenter)
+        
+    
+        return label    
     #Screen Settings   
     def initScreenSize(self):
-       screenWidth = (int)(GetSystemMetrics(1) -  0.08*GetSystemMetrics(1))
-       self.move((int)(GetSystemMetrics(1)/2),0)
-       self.resize(screenWidth,screenWidth)
+       
+       self.move(993/2,0)
+       self.resize(993,993)
        self.setFixedSize(self.size())
-       return screenWidth
+       return 993
    
-    def initBackground(self,screenWidth):
-       oImage = QImage('resources/table.png')
-       sImage = oImage.scaled(QSize(screenWidth,screenWidth))                   # resize Image to widgets size
-       palette = QPalette()
-       palette.setBrush(QPalette.Background, QBrush(sImage))                        
-       self.setPalette(palette)
+    def initBackground(self,screenWidth,path):
+        oImage = QImage(path)
+        sImage = oImage.scaled(QSize(screenWidth,screenWidth))                   # resize Image to widgets size
+        palette = QPalette()
+        palette.setBrush(QPalette.Window, QBrush(sImage))                        
+        self.setPalette(palette)
        
-    ## GIF STAFF   
-    def createLabelGif(self,filename,speed):
-        movie = self.loadFileIntoMovie(filename)
-        movieScreen = self.makeLabelfitTheGif()
-        self.addTheMovieOBjectToTheLabel(movie,speed,movieScreen)
-        return movieScreen
-        
-    def loadFileIntoMovie(self,filename):
-        movie = QMovie(filename, QByteArray(), self)
-        movie.setScaledSize(QSize().scaled(GetSystemMetrics(1) -  0.08*GetSystemMetrics(1),GetSystemMetrics(1) -  0.08*GetSystemMetrics(1),Qt.KeepAspectRatio))
-        return movie
-        
-    def makeLabelfitTheGif(self):
-        movie_screen = QLabel()
-        movie_screen.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
-        movie_screen.setAlignment(Qt.AlignCenter)
-        return movie_screen   
     
-    def addTheMovieOBjectToTheLabel(self, movie,speed,movie_screen):
-        movie.setCacheMode(QMovie.CacheAll)
-        movie.setSpeed(speed)
-        movie_screen.setMovie(movie)
-        movie.start()  
-     ## GIF STAFF 
-     ## Waiting for connection
-    def waitingForConnection(self):
-        #wait for connection in loop
-        #need connection checked
-        
-        time.sleep(2)
-        
-        if self.connected:
-            #if connected then delete waiting gif
-            self.oLayout.itemAt(0).widget().setParent(None)
-            self.init()
-             
-   
-
-          
-    
-
-      
-
-       
 
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyleSheet('QWidget{background-color:black}')
+    app.aboutToQuit.connect(app.deleteLater)
+    #app.setStyleSheet('QWidget{background-color:black}')
     oMainwindow = GamePanel(app)
     sys.exit(app.exec_())
     
