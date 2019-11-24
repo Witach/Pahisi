@@ -3,10 +3,9 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from win32api import GetSystemMetrics
-import time
-import threading
-import math
 
+import random
+import time
 
 class GamePanel(QWidget):
     port = 6669
@@ -25,13 +24,20 @@ class GamePanel(QWidget):
     yellowPawnsStartingPositionsCoordinates = [[108 ,888],[24,890],[22,794],[110,794]]
     
     starterPositionsCoordinates = [[24,370],[544,22],[880,544],[366,882]]
-    milieusPositions = [[24,370],[98,370],[182,370],[264,370],[366,366],[366,278],
-                        [366,192],[366,104],[366,28],[456,24],[544,22],[544,102],
-                        [544,184],[544,266],[544,362],[622,366],[708,366],[796,366],
-                        [880,366],[880,456],[880,542],[798,544],[710,544],[622,544],
-                        [544,544],[544,626],[544,708],[544,790],[544,886],[458,886],
-                        [368,882],[368,800],[368,714],[368,626],[368,544],[266,540],
-                        [182,540],[100,540],[26,540],[26,460]]
+    milieusPositionsCoordinates = [[24,370],[98,370],[182,370],[264,370],[366,366],[366,278],
+                                   [366,192],[366,104],[366,28],[456,24],[544,22],[544,102],
+                                   [544,184],[544,266],[544,362],[622,366],[708,366],[796,366],
+                                   [880,366],[880,456],[880,542],[798,544],[710,544],[622,544],
+                                   [544,544],[544,626],[544,708],[544,790],[544,886],[458,886],
+                                   [368,882],[368,800],[368,714],[368,626],[368,544],[266,540],
+                                   [182,540],[100,540],[26,540],[26,460]]
+    
+    winnerPositionsCoordinates = [[[106,456],[194,458],[282,458],[364,456]],
+                                  [[452,108],[452,194],[452,280],[452,362]],
+                                  [[798,454],[716,454],[628,454],[542,454]],
+                                  [[454,802],[454,716],[454,628],[454,546]]]
+    
+    dicesPositionCoordinates = [[238,235],[667,233],[668,672],[239,669]]
     #lists of labels
     redPawnsStartingPosiotions = []
     bluePawnsStartingPosiotions = []
@@ -41,7 +47,19 @@ class GamePanel(QWidget):
     starterPositions = []
     #surroundings layer
     milieusPositions = []
-    winnerPositions = [[]]
+    #winning Posistions
+    redWinningPositions = []
+    blueWinningPositions = []
+    greenWinningPositions = []
+    yellowWinningPositions = []
+    #dice
+    dicePositions = []
+    #current posistions of pawns
+    #list of label that pawn have
+    redPawns = []
+    bluePawns = []
+    greenPawns = []
+    yellowPawns = []
     
     
     ##place for more positions
@@ -72,26 +90,34 @@ class GamePanel(QWidget):
         
     def waitForPlayers(self):
         
-        for n in range(20):
+        for n in range(10):
             QApplication.processEvents()
             time.sleep(0.1)
         #if statement needed, when server collected all players (OK TRUE)
+    #def moveOnScreen(self):
         
         
     def init(self,path="resources/table.png"):
         
-       self.initScreenSize()
-       self.initBackground(993,path)
-       self.setAllPawnsPosiotions()
-       self.setPawnsImages()
-    
+        self.initScreenSize()
+        self.initBackground(993,path)
+        self.setAllPawnsPosiotions()
+        
+        self.setPawnsImages()
+        self.setDicesImages()
+        
     def setAllPawnsPosiotions(self):
         self.createPawnPosiotions(self.redPawnsStartingPositionsCoordinates,self.redPawnsStartingPosiotions)
         self.createPawnPosiotions(self.bluePawnsStartingPositionsCoordinates,self.bluePawnsStartingPosiotions)
         self.createPawnPosiotions(self.greenPawnsStartingPositionsCoordinates,self.greenPawnsStartingPosiotions)
         self.createPawnPosiotions(self.yellowPawnsStartingPositionsCoordinates,self.yellowPawnsStartingPosiotions)
-        
-        
+        self.createPawnPosiotions(self.starterPositionsCoordinates,self.starterPositions)
+        self.createPawnPosiotions(self.milieusPositionsCoordinates,self.milieusPositions)
+        self.createPawnPosiotions(self.winnerPositionsCoordinates[0],self.redWinningPositions)
+        self.createPawnPosiotions(self.winnerPositionsCoordinates[1],self.blueWinningPositions)
+        self.createPawnPosiotions(self.winnerPositionsCoordinates[2],self.greenWinningPositions)
+        self.createPawnPosiotions(self.winnerPositionsCoordinates[3],self.yellowWinningPositions)
+        self.createPawnPosiotions(self.dicesPositionCoordinates,self.dicePositions)
         ##TODO REST OF POSISTIONS
         
     def setPawnsImages(self):
@@ -99,31 +125,70 @@ class GamePanel(QWidget):
         self.bluePawnImage = self.createPawn('resources/bluePawn.png')
         self.greenPawnImage = self.createPawn('resources/greenPawn.png')
         self.yellowPawnImage = self.createPawn('resources/yellowPawn.png')
+    def setDicesImages(self):
+        self.diceImage = []
+        path = 'resources/k'
+        for i in range(1,6):
+            Image = self.createDice('resources/k'+ str(i) +'.png')
+            self.diceImage.append(Image)
         
     def gameStart(self):
         #asking server about players roles and quantity
         self.setPawnsOnStartingPosiotions()
+        #nasluchuje server czeka na zmiany 
+        """
+            server przydziela kolejke kazdemu graczowi wtedy client czeka
+            az server odda tę kolejke mu. Gdy mu odda kolejke wtedy on losuje liczbe lub 
+            server oddajac mu kolejke wysyla mu liczbe oraz wszystkim innym gracza (tak lepiej chyba)
+            
+            
+        """
+        self.movePawn(self.redPawns[0],self.milieusPositions[0])
+        
+        
+        #self.movePawn(self.milieusPositions[0],self.redPawnsStartingPosiotions[0],self.redPawnImage)
         #rest of game
+    def movePawn(self,pawn,destinationPosition):
+        
+        pawn.getCurrentPosition().setVisible(False)
+        pawn.setCurrentPosition(destinationPosition)
+        self.setPawnOnPosition(pawn)
+        
+   
         
         
         
+        
+    def roleTheDice(self):
+        #1 - 6 - 1
+        return random.randint(0,6) - 1
+    
         
         
     def setPawnsOnStartingPosiotions(self):
         rolesArray = self.getPlayersRoles()
         for i in rolesArray:
+            j = 0
             if i == self.red:
                 for i in self.redPawnsStartingPosiotions:
-                    self.setPawnOnPosition(i,self.redPawnImage)
-            if i == self.blue:
+                    self.redPawns.append(Pawn(i,self.redPawnImage,'red'))
+                    self.setPawnOnPosition(self.redPawns[j])
+                    j+=1
+            elif i == self.blue:
                 for i in self.bluePawnsStartingPosiotions:
-                    self.setPawnOnPosition(i,self.bluePawnImage)
-            if i == self.green:
+                    self.bluePawns.append(Pawn(i,self.bluePawnImage,'blue'))
+                    self.setPawnOnPosition(self.bluePawns[j])
+                    j+=1
+            elif i == self.green:
                 for i in self.greenPawnsStartingPosiotions:
-                    self.setPawnOnPosition(i,self.greenPawnImage)
-            if i == self.yellow:
+                    self.greenPawns.append(Pawn(i,self.greenPawnImage,'green'))
+                    self.setPawnOnPosition(self.greenPawns[j])
+                    j+=1
+            elif i == self.yellow:
                 for i in self.yellowPawnsStartingPosiotions:
-                    self.setPawnOnPosition(i,self.yellowPawnImage)      
+                    self.yellowPawns.append(Pawn(i,self.yellowPawnImage,'yellow'))
+                    self.setPawnOnPosition(self.yellowPawns[j])
+                    j+=1     
     
     def createPawnPosiotions(self,coordinates,posiotions):
        
@@ -133,17 +198,21 @@ class GamePanel(QWidget):
             posiotions[j].move(i[0], i[1])
             j+=1
             
-    def setPawnOnPosition(self,position,pawn): 
+    def setPawnOnPosition(self,pawn): 
         """
             Position is a label 
             pawn is scaled picture 
         """
-        position.setPixmap(QPixmap.fromImage(pawn))
-        position.setScaledContents(False)
-        position.setVisible(True)
-        position.setAlignment(Qt.AlignCenter)
+        pawn.getCurrentPosition().setPixmap(QPixmap.fromImage(pawn.getColor()))
+        pawn.getCurrentPosition().setScaledContents(False)
+        pawn.getCurrentPosition().setVisible(True)
+        pawn.getCurrentPosition().setAlignment(Qt.AlignCenter)
+        pawn.getCurrentPosition().setStyleSheet('QLabel{border: 1px solid white;border-style: outset;border-radius: 37px;}QLabel:hover{border: 17px solid '+pawn.getColorName() +';border-radius: 37px;}')
         
-    
+    def createDice(self,path):
+        Image = QImage(path)
+        Image = Image.scaled(100,100)
+        return Image
         
     def createPawn(self,path):
         Image = QImage(path)
@@ -159,7 +228,7 @@ class GamePanel(QWidget):
             4 - zolty
             moglyby to byc enum ale dzialaloby to tak samo plus nie chce mi sie tego ogarniac w pythonie XD
         """ 
-        tempArray = [1,2,3]
+        tempArray = [1,2,3,4]
         return tempArray
     
         
@@ -192,9 +261,19 @@ class GamePanel(QWidget):
         palette = QPalette()
         palette.setBrush(QPalette.Window, QBrush(sImage))                        
         self.setPalette(palette)
-   
-    
-
+class Pawn():
+    def __init__(self,posistion,color,colorName):
+        self.currentPosition = posistion
+        self.pawnColor = color
+        self.colorName = colorName
+    def getCurrentPosition(self):
+        return self.currentPosition
+    def getColor(self):
+        return self.pawnColor
+    def setCurrentPosition(self,position):
+        self.currentPosition = position
+    def getColorName(self):
+        return self.colorName
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
