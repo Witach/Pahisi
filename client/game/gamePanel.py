@@ -18,9 +18,15 @@ class GamePanel(QWidget):
     blue = 2
     green = 3
     yellow= 4
-    oLayout = QVBoxLayout()
     redPawnsStartingPosition = [[22,26],[110,24],[110,104],[22,108]]
     bluePawnsStartingPosition = [[788,22],[880,22],[880,102],[790,104]]
+    greenPawnsStartingPosition = [[880,798],[880 ,892],[792 ,890],[792 ,800]]
+    yellowPawnsStartingPosition = [[108 ,888],[24,890],[22,794],[110,794]]
+    redPawns = []
+    bluePawns = []
+    greenPawns = []
+    yellowPawns = []
+    
     ##place for more positions
     
     def __init__(self,parent,ipAdress = '127.0.0.1',port = 6669):
@@ -30,21 +36,16 @@ class GamePanel(QWidget):
        self.ipAdress = ipAdress
        ##GIF WAITING staff
        
-       ##WAITING FOR CONNECTION THREAD IF CONNECTED THEN START GAME
-       #x = threading.Thread(target=self.waitingForConnection, args=())
-       #x.start()
-       ## CREATE THREAD LOADING STAGE ☼
+       
        self.initScreenSize()
        self.initBackground(993,'resources/wait.jpg')
        self.show()
        
-       #parent.setCentralWidget(self)
+       
        self.waitForPlayers()
-       self.close()
+       self.close()#bardzo wazne
        self.init()
-       
        self.show()
-       
        
        
        
@@ -52,7 +53,7 @@ class GamePanel(QWidget):
        
     def waitForPlayers(self):
         
-        for n in range(50):
+        for n in range(1):
             QApplication.processEvents()
             time.sleep(0.1)
         #if statement needed, when server collected all players (OK TRUE)
@@ -71,13 +72,13 @@ class GamePanel(QWidget):
         rolesArray = self.getPlayersRoles()
         for i in rolesArray:
             if i == self.red:
-                self.createPawns(self.redPawnsStartingPosition,'resources/redPawn.png')
+                self.createPawns(self.redPawnsStartingPosition,'resources/redPawn.png',self.redPawns)
             if i == self.blue:
-                print('2')
+                self.createPawns(self.bluePawnsStartingPosition,'resources/bluePawn.png',self.bluePawns)
             if i == self.green:
-                print('3')
+                self.createPawns(self.greenPawnsStartingPosition,'resources/greenPawn.png',self.greenPawns)
             if i == self.yellow:
-                print('4')
+                self.createPawns(self.yellowPawnsStartingPosition,'resources/yellowPawn.png',self.yellowPawns)
     
         
     def getPlayersRoles(self):
@@ -89,17 +90,17 @@ class GamePanel(QWidget):
             4 - zolty
             moglyby to byc enum ale dzialaloby to tak samo plus nie chce mi sie tego ogarniac w pythonie XD
         """ 
-        tempArray = [1,2]
+        tempArray = [1,2,3,4]
         return tempArray
-    def createPawns(self,position,path):
+    def createPawns(self,position,path,pawns):
         """
             wazne jest aby zapamietac obrazki pionkow bardzo wazne
         """
+        j = 0
         for i in position:
-            image = self.createImage(path)
-            self.oLayout.addWidget(image)
-            print(str(i[0])+str(i[1]))
-            image.move(i[0],i[1])
+            pawns.append(self.createImage(path))
+            pawns[j].move(i[0],i[1])
+            j+=1
         
     def createImage(self,path):
         label = QLabel(self)
@@ -126,7 +127,7 @@ class GamePanel(QWidget):
         palette = QPalette()
         palette.setBrush(QPalette.Window, QBrush(sImage))                        
         self.setPalette(palette)
-       
+   
     
 
         
