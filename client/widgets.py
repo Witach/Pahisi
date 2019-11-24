@@ -3,7 +3,7 @@ from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 from datetime import datetime
 from win32api import GetSystemMetrics
-from client.game.Game import Scene
+from client.game.gamePanel import GamePanel
 class Widgets(QWidget):
     numberOfPlayers = 2
     port = 6669
@@ -23,7 +23,6 @@ class Widgets(QWidget):
         textVBox = self.createTextVBox('set IP:', 'set port:')
 
         splitter = self.createInteractBox(textVBox)
-        #movie =  self.createLabelGif('client/resources/pachisi.gif',110)
         mainVerticalList = self.createMainVerticaLList(splitter,'client/resources/dice.png')
 
         self.setLayout(mainVerticalList)
@@ -129,14 +128,13 @@ class Widgets(QWidget):
         button.clicked.connect(method)
         return button
     def startGame(self):
-        screenWidth = (int)(GetSystemMetrics(1) -  0.08*GetSystemMetrics(1))
-        self.parent.move((int)(GetSystemMetrics(1)/2),0)
-        self.close()
-        nowy widget
-        ##TODO staff like connection with server checking
-        #self.game = Scene(self.parent)
         
-        self.parent.resize(screenWidth,screenWidth)
+        self.gamePanel = GamePanel()
+        
+        #self.parent.setCentralWidget(self.gamePanel)
+        self.close()
+        self.parent.close()
+        
         
         
         
