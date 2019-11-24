@@ -90,7 +90,7 @@ class GamePanel(QWidget):
         
     def waitForPlayers(self):
         
-        for n in range(10):
+        for n in range(1):
             QApplication.processEvents()
             time.sleep(0.1)
         #if statement needed, when server collected all players (OK TRUE)
@@ -128,40 +128,43 @@ class GamePanel(QWidget):
     def setDicesImages(self):
         self.diceImage = []
         path = 'resources/k'
-        for i in range(1,6):
+        for i in range(1,7):
             Image = self.createDice('resources/k'+ str(i) +'.png')
             self.diceImage.append(Image)
         
     def gameStart(self):
         #asking server about players roles and quantity
         self.setPawnsOnStartingPosiotions()
-        #nasluchuje server czeka na zmiany 
-        """
-            server przydziela kolejke kazdemu graczowi wtedy client czeka
-            az server odda tę kolejke mu. Gdy mu odda kolejke wtedy on losuje liczbe lub 
-            server oddajac mu kolejke wysyla mu liczbe oraz wszystkim innym gracza (tak lepiej chyba)
+        
+        self.setDiceOnStartPosition()
+        
+        while noOneWins:
+            
+       
             
             
-        """
-        self.movePawn(self.redPawns[0],self.milieusPositions[0])
         
         
-        #self.movePawn(self.milieusPositions[0],self.redPawnsStartingPosiotions[0],self.redPawnImage)
-        #rest of game
+   
     def movePawn(self,pawn,destinationPosition):
         
         pawn.getCurrentPosition().setVisible(False)
         pawn.setCurrentPosition(destinationPosition)
         self.setPawnOnPosition(pawn)
         
-   
+    def setDiceOnStartPosition(self):
+        self.dice = Dice(self.dicePositions[0],self.diceImage)
+        self.setDiceOnPosition(self.dice,self.roleTheDice())
         
-        
-        
+    def setDiceOnPosition(self,dice,number):     
+        dice.getCurrentPosition().setPixmap(QPixmap.fromImage(dice.getSideByNumber(number)))
+        dice.getCurrentPosition().setScaledContents(False)
+        dice.getCurrentPosition().setVisible(True)
+        dice.getCurrentPosition().setAlignment(Qt.AlignCenter)
         
     def roleTheDice(self):
-        #1 - 6 - 1
-        return random.randint(0,6) - 1
+        # zakres 1 - 6
+        return random.randint(0,6)
     
         
         
@@ -197,7 +200,8 @@ class GamePanel(QWidget):
             posiotions.append(QLabel(self))
             posiotions[j].move(i[0], i[1])
             j+=1
-            
+    
+                
     def setPawnOnPosition(self,pawn): 
         """
             Position is a label 
@@ -274,6 +278,22 @@ class Pawn():
         self.currentPosition = position
     def getColorName(self):
         return self.colorName
+class Dice(): 
+    def __init__(self,posistion,sidesImages):
+        self.currentPosition = posistion
+        self.sidesImages = sidesImages
+        self.currentSide = 1
+    def getSideByNumber(self,number):
+        self.currentSide = number
+        print(number)
+        return self.sidesImages[number-1]
+    def setCurrentPosition(self,position):
+        self.currentPosition = position
+    def getCurrentPosition(self):
+        return self.currentPosition
+    def getCurrentSide(self):
+        return self.currentSide
+     
         
 if __name__ == "__main__":
     app = QApplication(sys.argv)
