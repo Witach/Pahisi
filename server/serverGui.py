@@ -20,8 +20,7 @@ class MyMainWindow(QMainWindow):
     screenHeight = 1080
     screenWidth = 1920
 
-    def __init__(self, parent=None):
-        super().__init__(parent)
+    def __init__(self):
         self.setWindowIcon(QIcon('server/resources/server.png'))
         self.widgets = Widgets()
         self.setCentralWidget(self.widgets)
