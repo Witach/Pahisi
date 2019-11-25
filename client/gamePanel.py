@@ -74,7 +74,7 @@ class GamePanel(QWidget):
        
        self.initScreenSize()
        self.initBackground(993,'resources/wait.jpg')
-       
+      
        
        self.show()
        self.waitForPlayers()
@@ -102,7 +102,7 @@ class GamePanel(QWidget):
         self.initScreenSize()
         self.initBackground(993,path)
         self.setAllPawnsPosiotions()
-        
+        self.skipButton()
         self.setPawnsImages()
         self.setDicesImages()
         
@@ -134,20 +134,57 @@ class GamePanel(QWidget):
         
     def gameStart(self):
         #asking server about players roles and quantity
+        #this we need from server if red so redPawns we have
+        self.role = self.yellowPawns
         self.setPawnsOnStartingPosiotions()
         
         self.setDiceOnStartPosition()
-        
+        noOneWins = True
         while noOneWins:
+            QApplication.processEvents()
+            time.sleep(0.01)
+    def pawnEvent(self):
+        for i in self.role:
+            if i.getCurrentPosition() == self.sender():
+                i.setPosition(self.dice.currentSide)
+                self.movePawn(i,i.getPosition())
+                break
+            
+        print(self.sender())        
             
        
             
             
+    def closeEvent(self, event):
+
+        quit_msg = "Are you sure you want to exit the program?"
+        reply = QMessageBox.question(self, 'Message', 
+                         quit_msg, QMessageBox.Yes, QMessageBox.No)
+    
+        if reply == QMessageBox.Yes:
+            event.accept()
+            sys.exit()
+        else:
+            event.ignore()
         
+    def skipButton(self):
+        self.skip = QPushButton(self)
+        self.skip.setText('SKIP')
+        self.skip.setGeometry(993/2-50,993/2-50,90,90)
+        #self.skip.setAlignment(Qt.AlignCenter)
+        #self.skip.setScaledContents(False)
+        self.skip.setStyleSheet("QPushButton {color: BLACK;background-color:#FFFFFF;border-style: outset;border: 5px solid black;border-radius: 45px;font-size: 25px;font-family: Arial;font-weight: bold;}QPushButton:hover:!pressed{color: WHITE;background-color:#151515;border-style: outset;border: 5px solid white;border-radius: 45px;font-size: 25px;font-family: Arial;font-weight: bold;} ")
+        self.skip.setVisible(True)
+        self.skip.clicked.connect(self.skipEvent)
+        print(self.skip)
+    def skipEvent(self):
+        #nextTurn
+        self.setDiceOnPosition(self.dice,self.roleTheDice())
+        print(self.sender().text())
         
-   
     def movePawn(self,pawn,destinationPosition):
-        
+        if destinationPosition == 0:
+            return
         pawn.getCurrentPosition().setVisible(False)
         pawn.setCurrentPosition(destinationPosition)
         self.setPawnOnPosition(pawn)
@@ -164,7 +201,7 @@ class GamePanel(QWidget):
         
     def roleTheDice(self):
         # zakres 1 - 6
-        return random.randint(0,6)
+        return random.randint(1,6)
     
         
         
@@ -174,22 +211,23 @@ class GamePanel(QWidget):
             j = 0
             if i == self.red:
                 for i in self.redPawnsStartingPosiotions:
-                    self.redPawns.append(Pawn(i,self.redPawnImage,'red'))
+                    #Pawn creations
+                    self.redPawns.append(Pawn(i,self.redPawnImage,'red',0,self.redWinningPositions,self.milieusPositions))
                     self.setPawnOnPosition(self.redPawns[j])
                     j+=1
             elif i == self.blue:
                 for i in self.bluePawnsStartingPosiotions:
-                    self.bluePawns.append(Pawn(i,self.bluePawnImage,'blue'))
+                    self.bluePawns.append(Pawn(i,self.bluePawnImage,'blue',10,self.blueWinningPositions,self.milieusPositions))
                     self.setPawnOnPosition(self.bluePawns[j])
                     j+=1
             elif i == self.green:
                 for i in self.greenPawnsStartingPosiotions:
-                    self.greenPawns.append(Pawn(i,self.greenPawnImage,'green'))
+                    self.greenPawns.append(Pawn(i,self.greenPawnImage,'green',20,self.greenWinningPositions,self.milieusPositions))
                     self.setPawnOnPosition(self.greenPawns[j])
                     j+=1
             elif i == self.yellow:
                 for i in self.yellowPawnsStartingPosiotions:
-                    self.yellowPawns.append(Pawn(i,self.yellowPawnImage,'yellow'))
+                    self.yellowPawns.append(Pawn(i,self.yellowPawnImage,'yellow',30,self.yellowWinningPositions,self.milieusPositions))
                     self.setPawnOnPosition(self.yellowPawns[j])
                     j+=1     
     
@@ -197,21 +235,20 @@ class GamePanel(QWidget):
        
         j = 0
         for i in coordinates:
-            posiotions.append(QLabel(self))
+            posiotions.append(ClickLabel(self))
             posiotions[j].move(i[0], i[1])
             j+=1
     
                 
-    def setPawnOnPosition(self,pawn): 
-        """
-            Position is a label 
-            pawn is scaled picture 
-        """
+    def setPawnOnPosition(self,pawn):
         pawn.getCurrentPosition().setPixmap(QPixmap.fromImage(pawn.getColor()))
         pawn.getCurrentPosition().setScaledContents(False)
         pawn.getCurrentPosition().setVisible(True)
         pawn.getCurrentPosition().setAlignment(Qt.AlignCenter)
         pawn.getCurrentPosition().setStyleSheet('QLabel{border: 1px solid white;border-style: outset;border-radius: 37px;}QLabel:hover{border: 17px solid '+pawn.getColorName() +';border-radius: 37px;}')
+        pawn.getCurrentPosition().clicked.connect(self.pawnEvent)
+        
+    
         
     def createDice(self,path):
         Image = QImage(path)
@@ -265,11 +302,30 @@ class GamePanel(QWidget):
         palette = QPalette()
         palette.setBrush(QPalette.Window, QBrush(sImage))                        
         self.setPalette(palette)
+class ClickLabel(QLabel):
+    clicked = pyqtSignal()
+    def mousePressEvent(self, event):
+        self.clicked.emit()
+        QLabel.mousePressEvent(self, event)
 class Pawn():
-    def __init__(self,posistion,color,colorName):
+    def __init__(self,posistion,color,colorName,
+                 enterPosition,WinningPositions ,
+                 NormalPositions):
+        #Qlabel
+        self.startPosition = posistion
         self.currentPosition = posistion
+        #String and Image
         self.pawnColor = color
         self.colorName = colorName
+        #position in number
+        self.position = -1
+        #enterPosition as number int
+        self.enterPosition = enterPosition
+        self.WinningPositions = WinningPositions
+        self.NormalPositions = NormalPositions
+        self.changeBool = False
+        
+        
     def getCurrentPosition(self):
         return self.currentPosition
     def getColor(self):
@@ -278,6 +334,41 @@ class Pawn():
         self.currentPosition = position
     def getColorName(self):
         return self.colorName
+    def setPosition(self,add):
+        ##bardzo wczesna wersja 149
+        
+       
+        print('setPosition self.position + add = ' + str(self.position + add))
+        if self.position == -1 and add == 6:
+            self.position = 0
+            self.changeBool = True
+            
+        elif self.position > -1 and 43 >= (self.position + add) :
+            self.position += add 
+           
+            self.changeBool = True
+        else:
+            self.changeBool = False
+        print('setPosition: '+str(self.changeBool))
+        #####TO DO zrobic tutaj piekna walidacje dodac z kartki rzeczy czyli translacja na 0 - 39 ale kazdy obiekt widzi jakby to on mial od 0 do 39 position a bedzie innaczej wyswietlany (z przesunieciem tylko)
+         
+    def getPosition(self):
+        if not self.changeBool:
+            print('getPosition: '+str(self.changeBool))
+            return  0
+        elif self.position >= 0 and self.position <= 39:
+            print('getPosition: '+str(self.changeBool))
+            return self.NormalPositions[(self.position+self.enterPosition)%40]
+        elif self.position >= 40 and self.position <= 43:
+            print('getPosition: '+str(self.changeBool))
+            return self.WinningPositions[self.position-40]
+            
+            
+      
+        
+        
+        return 0
+        
 class Dice(): 
     def __init__(self,posistion,sidesImages):
         self.currentPosition = posistion
