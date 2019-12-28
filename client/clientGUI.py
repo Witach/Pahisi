@@ -33,4 +33,3 @@ class MyMainWindow(QMainWindow):
             math.floor(self.screenWidth / 2 - self.height),
             math.floor(self.screenHeight / 2 -400)
         )
-        

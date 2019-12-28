@@ -1,9 +1,9 @@
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import *
 from PyQt5.QtCore import *
-from datetime import datetime
-from win32api import GetSystemMetrics
+from PyQt5.QtGui import *
+from PyQt5.QtWidgets import *
 from client.game.gamePanel import GamePanel
+
+
 class Widgets(QWidget):
     numberOfPlayers = 2
     port = 6669

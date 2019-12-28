@@ -1,6 +1,6 @@
 from game.player import *
 from .position import *
-from game.pawn import *
+from .pawn import *
 import random
 
 class GameState:
@@ -11,8 +11,11 @@ class GameState:
         self.__updatePawns()
         self.dice = 0
         self.turn = ""
+        self.turnGenerator= self.__nextTurnGenerator()
 
     def __str__(self):
+
+        self.__getpawns()
         return str(self.dictOfPlayers[RED]) + \
                str(self.dictOfPlayers[GREEN]) + \
                str(self.dictOfPlayers[YELLOW]) + \
@@ -22,17 +25,21 @@ class GameState:
         return [x for i in [self.dictOfPlayers[RED], self.dictOfPlayers[GREEN], self.dictOfPlayers[YELLOW],
                             self.dictOfPlayers[BLUE]] for x in i.pawns]
 
+    # TODO pola źle się dodają i typ się nie zmienia
     def tryToReplacePawn(self, position, steps):
         tpawn = self.__findPawnByPosition(position)
-        newPosition = Position(position.number + steps, position.typeOfPosition)
+        print("Typ position: ",type(position.number))
+        print("Typ steps: ",type(steps))
+        newPosition = Position(int(position.number) + int(steps), position.typeOfPosition)
         if self.__checkForWinPlace(tpawn, newPosition):
             tpawn.position = self.__generateEmptyPlace(tpawn, WIN_POSITION)
             return
-        if tpawn.position == START_POSITION:
+        if tpawn.position.typeOfPosition == START_POSITION:
             tpawn.position = Position(START_PLACES[tpawn.color], NORMAL_POSITION)
+            return
         if self.__checkForFight(newPosition):
             epawn = self.__findPawnByPosition(newPosition)
-            epawn.position = self.__generateEmptyPlace(epawn, START_POSITION)
+            epawn.position = Position(epawn.idOfStartPlace,START_POSITION)
         tpawn.position = newPosition
 
     def __findPawnByPosition(self, position):
@@ -42,7 +49,7 @@ class GameState:
         return None
 
     def __checkForWinPlace(self, pawn, newPosition):
-        return (pawn.position.number + newPosition.number) > self.WIN_PLACES[pawn.color]
+        return (pawn.position.number + newPosition.number) > WIN_PLACES[pawn.color]
 
     def __checkForFight(self, newPosition):
         return not self.__findPawnByPosition(newPosition) is None
@@ -64,10 +71,13 @@ class GameState:
                     return k
         return None
 
-    def nextTurn(self):
+    def __nextTurnGenerator(self):
         while True:
             for i in self.dictOfPlayers.keys():
                 yield i
+
+    def nextTurn(self):
+        return next(self.turnGenerator)
 
     def getDiceNumber(self):
         return random.choice(list(range(1,7)))
@@ -83,7 +93,7 @@ class GameState:
 def parseToGameState(text):
     tmpGameState = GameState()
     players = text.split("]")
-    for player in players:
+    for player in players[:-1]:
         tmpPlayer = parseToPlayer(player)
         tmpGameState.setPlayer(tmpPlayer)
     return tmpGameState

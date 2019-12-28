@@ -12,7 +12,10 @@ class Position:
         self.typeOfPosition = typeOfPosition
 
     def __eq__(self, other):
-        return self.number == other.number and self.typeOfPosition == other.typeOfPosition
-
+        print(other)
+        if type(other) == type(int())  or type(other) == type(str()):
+            return int(self.number) == int(other) and self.typeOfPosition == other.typeOfPosition
+        else:
+            return int(self.number) == int(other.number) and self.typeOfPosition == other.typeOfPosition
     def __str__(self):
         return self.typeOfPosition+ str(self.number)

@@ -37,8 +37,10 @@ class Player:
     def __str__(self):
         res = self.color[0]
         res += "["
-        for i in self.pawns:
-            res += str(i) + ","
+        for index , pawn in  enumerate(self.pawns):
+            res += str(pawn)
+            if index != 3:
+                res += ","
         res += "]"
         return res
 
@@ -54,14 +56,19 @@ class Player:
 
 def createPlayer(color):
     return Player(color, [
-        pawn.Pawn(color, 0, START_POSITION),
-        pawn.Pawn(color, 1, START_POSITION),
-        pawn.Pawn(color, 2, START_POSITION),
-        pawn.Pawn(color, 3, START_POSITION),
+        pawn.Pawn(color, 0, START_POSITION,0),
+        pawn.Pawn(color, 1, START_POSITION,1),
+        pawn.Pawn(color, 2, START_POSITION,2),
+        pawn.Pawn(color, 3, START_POSITION,3),
     ])
 
 def parseToPlayer(text):
+    print("="*20)
+    print(text)
     playerTokens = text.split("[")
+    print("playerTokens[1].split(",")")
+    print(playerTokens[1].split(","))
+    print("playerTokens[1].split(", ")")
     pawnsTokens =  playerTokens[1].split(",")
     pawns = []
     for pawn in pawnsTokens:
