@@ -48,8 +48,6 @@ class newGamePanel(QWidget):
         self.__printBackground__()
         self.__InitPawns__()
         self.__InitDice__()
-        self.show()
-
         self.startGame()
     def __InitDice__(self):
         self.label = QLabel(self)
@@ -89,7 +87,9 @@ class newGamePanel(QWidget):
             self.pawnsArray.append( Pawn("S" + str(i % 4), button, color))
 
             # button.move(100, 70)
-
+        self.myRoleSign = QPushButton(self);
+        self.myRoleSign.resize(90, 90)
+        self.myRoleSign.move(993 // 2 - 50,993 // 2 - 50)
     def wait(self, sec=1):
         for n in range(sec * 10):
             QApplication.processEvents()
@@ -109,6 +109,8 @@ class newGamePanel(QWidget):
         elif self.serverGameAPI.COLOR == "G":
             self.myPawns = self.pawnsArray[4:8]
 
+        self.myRoleSign.setStyleSheet("background-color: "+ self.myPawns[0].color)
+        self.show()
         for i in self.myPawns:
             print(i.position + " " + i.color)
         self.__updateView__()
@@ -178,6 +180,7 @@ class newGamePanel(QWidget):
                             isKanibal = True
                     if not isKanibal:'''
                     self.serverGameAPI.sendMove(i.position)
+                    print(self.serverGameAPI.PLAY)
 
 
 
