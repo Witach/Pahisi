@@ -52,17 +52,26 @@ def gameLogic(sock):
         MOVE = parseToMove(DATA)
         print("try to move pawn")
         play.tryToReplacePawn(MOVE,DICE,COLOR)
-    print("server sends info about who is the winner")
-    bytesOfMessage = bytes(WIN_MESSAGE.format(turn=play.checkForWinner()[0]))
+    bytesOfMessage = bytes(INFO_MESSAGE.format(turn=COLOR, dice=DICE, gamestate=str(play)), ENCODING)
+    print(bytesOfMessage)
     for i in [RED, GREEN, BLUE, YELLOW]:
         dictOfSockets[i].send(bytesOfMessage)
+    print("server sends info about who is the winner")
+    bytesOfMessage = bytes(WIN_MESSAGE.format(turn=play.checkForWinner()[0]),encoding=ENCODING)
+    for i in [RED, GREEN, BLUE, YELLOW]:
+        dictOfSockets[i].send(bytesOfMessage)
+        dictOfSockets[i].close()
 
 def testInit(play):
     if TEST:
-        play.dictOfPlayers[RED].pawns[0].position.number = 39
-        play.dictOfPlayers[RED].pawns[0].position.typeOfPosition = NORMAL_POSITION
-        play.dictOfPlayers[BLUE].pawns[0].position.number = 9
-        play.dictOfPlayers[BLUE].pawns[0].position.typeOfPosition = NORMAL_POSITION
+        play.dictOfPlayers[RED].pawns[0].position.number = 0
+        play.dictOfPlayers[RED].pawns[0].position.typeOfPosition = WIN_POSITION
+        play.dictOfPlayers[RED].pawns[1].position.number = 1
+        play.dictOfPlayers[RED].pawns[1].position.typeOfPosition = WIN_POSITION
+        play.dictOfPlayers[RED].pawns[2].position.number = 2
+        play.dictOfPlayers[RED].pawns[2].position.typeOfPosition = WIN_POSITION
+        play.dictOfPlayers[RED].pawns[3].position.number = 39
+        play.dictOfPlayers[RED].pawns[3].position.typeOfPosition = NORMAL_POSITION
 
 def preparePlayers(sock):
     dictOfSockets = {}

@@ -71,6 +71,8 @@ class API():
         self.PLAY.setDictOfPlayers(tmpPlay.dictOfPlayers)
         self.PLAY.turn = turn
         self.PLAY.dice = dice
+        print("w"*20)
+        print(self.PLAY)
         print("Dice" + str(dice))
 
     def __ruleFunction(self,turn):
@@ -80,19 +82,24 @@ class API():
     def updateGame(self):
         while True:
             data = self.SOCK.recv(1024)
+            if not data:
+                break
             dataStr = str(data)[2:-1]
             for index, task in enumerate(dataStr.split("%")):
                 if index != len(dataStr.split("%")) - 1:
                     fun = self.__parserToFunction(task.split(self.SEPARATOR))
                     self.IS_WIN = fun()
+                    print(self.WINNER)
 
     def sendMove(self,position):
-        bytesOfMessage = bytes(self.MOVE_MESSAGE.format(position=position),"UTF-8")
-        self.SOCK.send(bytesOfMessage)
+        if not self.IS_WIN:
+            bytesOfMessage = bytes(self.MOVE_MESSAGE.format(position=position),"UTF-8")
+            self.SOCK.send(bytesOfMessage)
 
     def skipMove(self):
-        bytesOfMessage = bytes(self.SKIP_MESSAGE, "UTF-8")
-        self.SOCK.send(bytesOfMessage)
+        if not self.IS_WIN:
+            bytesOfMessage = bytes(self.SKIP_MESSAGE, "UTF-8")
+            self.SOCK.send(bytesOfMessage)
 
     def __startfun(self):
         self.IS_GAME_STARTED = True;
