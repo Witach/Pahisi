@@ -40,10 +40,10 @@ def gameLogic(sock):
         CONN = dictOfSockets[COLOR]
         print("next player is being asked for move")
         DATA = CONN.recv(1024)
-        DATA = str(DATA)[2:-1]
         if DATA == "SKIP":
             print("PLayer Have Skipped")
             continue
+        DATA = str(DATA)[2:-1]
         MOVE = parseToMove(DATA)
         print("try to move pawn")
         play.tryToReplacePawn(MOVE,DICE,COLOR)

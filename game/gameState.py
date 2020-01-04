@@ -31,17 +31,22 @@ class GameState:
         print("Typ position: ",type(position.number))
         print("Typ steps: ",type(steps))
         print("Kolor: ",color)
-        newPosition = Position(int(position.number) + int(steps), position.typeOfPosition)
-        if self.__checkForWinPlace(tpawn, newPosition) and tpawn.position.typeOfPosition == NORMAL_POSITION:
+        newPosition = self.addStepsToPositon(position, steps,color)
+        if self.__checkForWinPlace(tpawn, newPosition):
             tpawn.position = self.__generateEmptyPlace(tpawn, WIN_POSITION)
-            return
-        if tpawn.position.typeOfPosition == START_POSITION:
-            tpawn.position = Position(START_PLACES[tpawn.color], NORMAL_POSITION)
             return
         if self.__checkForFight(newPosition):
             epawn = self.__findPawnByPosition(newPosition)
             epawn.position = Position(epawn.idOfStartPlace,START_POSITION)
+        if tpawn.position.typeOfPosition == START_POSITION:
+            tpawn.position = Position(START_PLACES[tpawn.color], NORMAL_POSITION)
+            return
         tpawn.position = newPosition
+
+    def addStepsToPositon(self,position: Position, steps: int, color: str)-> Position:
+        if(position.typeOfPosition == START_POSITION):
+            return Position( START_PLACES[color], NORMAL_POSITION)
+        return Position( (int(position.number) + int(steps) ) % (WIN_PLACES[RED] +1), position.typeOfPosition)
 
     def __findPawnByPosition(self, position):
         for pawn in self.pawns:
@@ -56,11 +61,13 @@ class GameState:
         return None
 
     def __checkForWinPlace(self, pawn: Pawn, newPosition: Position) -> bool:
-        if newPosition.number > WIN_PLACES[pawn.color] >= pawn.position.number:
-            if not pawn.passedThroughStart:
-                pawn.passedThroughStart = True
-                return False
-            return True
+        if pawn.position.typeOfPosition == NORMAL_POSITION:
+            if newPosition.number > WIN_PLACES[pawn.color] >= pawn.position.number:
+                if not pawn.passedThroughStart:
+                    pawn.passedThroughStart = True
+                    return False
+                return True
+        return False
 
     def __checkForFight(self, newPosition):
         return not self.__findPawnByPosition(newPosition) is None
