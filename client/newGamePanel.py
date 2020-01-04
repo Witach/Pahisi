@@ -92,6 +92,8 @@ class newGamePanel(QWidget):
         self.myRoleSign.move(993 // 2 - 50,993 // 2 - 50)
         self.myRoleSign.clicked.connect(self.skipEvent)
         self.myRoleSign.setText("SKIP")
+        self.winner = QLabel(self)
+        self.winner.setVisible(False)
     def wait(self, sec=1):
         for n in range(sec * 10):
             QApplication.processEvents()
@@ -129,45 +131,70 @@ class newGamePanel(QWidget):
                 else:
                     flaga = True
                     self.myTurn = False
-
-
                 self.__updatePawnsPositions__()
                 self.setDiceToPlayer(self.serverGameAPI.PLAY.turn)
                 self.setDice(self.serverGameAPI.PLAY.dice)
             QApplication.processEvents()
             time.sleep(0.0001)
+        flagaa = True
+        while True:
+
+
+            self.winner.resize(993-20,100)
+            self.winner.move(10,450)
+            newfont = QFont("Times", 45, QFont.Bold)
+
+            if self.serverGameAPI.WINNER == "R" and flagaa:
+                self.winner.setStyleSheet("background-color: red")
+                self.winner.setText(" WYGRAł GRACZ CZERWONY !!!")
+            if self.serverGameAPI.WINNER == "B"  and flagaa:
+                self.winner.setStyleSheet("background-color: blue")
+                self.winner.setText(" WYGRAł GRACZ NIEBIESKI !!!")
+            if self.serverGameAPI.WINNER == "G" and flagaa:
+                self.winner.setStyleSheet("background-color: green")
+                self.winner.setText(" WYGRAł GRACZ ZIELONY !!!")
+            if self.serverGameAPI.WINNER == "Y" and flagaa:
+                self.winner.setStyleSheet("background-color: yellow")
+                self.winner.setText(" WYGRAł GRACZ ŻÓłTY !!!")
+            self.winner.setFont(newfont)
+            self.winner.setVisible(True)
+            flagaa = False
+            QApplication.processEvents()
+            time.sleep(0.0001)
+
 
     # tutaj beda poruszane wszystkie pionki na swoje pozycje ktore otrzymaja od serwera ;)
     def __updatePawnsPositions__(self):
         #pozycje lista
         pawns = self.serverGameAPI.PLAY.getpawns()
         for i in range(len(pawns)): # zwrocil nam pawny
-
             pawn = self.pawnsArray[i]
             if not pawn.position == str(pawns[i].position.typeOfPosition) + str(pawns[i].position.number):
                 print(self.serverGameAPI.PLAY)
                 print("update "+pawn.position + " " + pawn.color + " vs " + str(pawns[i].position.typeOfPosition) + str(pawns[i].position.number) + " " + pawns[i].color)
             pawn.position = str(pawns[i].position.typeOfPosition) + str(pawns[i].position.number)
             self.pawnsArray[i] = pawn
-
-
-
         #tutaj chcemy zaaktualizowac pozycje wszystkich pionkow po czym wywoluje sie kolejna funkcja ktora ustawia te pionki na obrazie
         self.__updateView__()
-
     def pawnEvent(self):
         if self.myTurn and self.serverGameAPI.IS_GAME_STARTED:
             for i in self.myPawns:
                 if i.QPushButtonID == self.sender():
-                    '''canIgo = self.__caIgo(i.color, i.position, self.serverGameAPI.PLAY.dice)
-                    ifCannibal = self.__ifCanibal(i, self.myPawns, self.serverGameAPI.PLAY.dice)
-                    if not (canIgo and ifCannibal):
-                        canIgo = False'''
+                    canIgo = self.__caIgo(i.color, i.position, self.serverGameAPI.PLAY.dice)
+                    print("can i go ? = " + str(canIgo))
+                    if canIgo:
+                        ifCannibal = self.ifCanibal(i, self.myPawns, self.serverGameAPI.PLAY.dice)
+                        if not ifCannibal:
+                            canIgo = False
+                    print("can i go ? = " + str(canIgo))
                     print("Wybrany pionek => " + i.position)
                     print("Moj kolor => " + self.serverGameAPI.COLOR)
-                    #if canIgo:
-                    self.serverGameAPI.sendMove(i.position)
-                    print(self.serverGameAPI.PLAY)
+
+                    if canIgo:
+                        self.serverGameAPI.sendMove(i.position)
+                        print(self.serverGameAPI.PLAY)
+                    else:
+                        print("nie mozesz sie ruszyc tym pionkiem !")
 
     def skipEvent(self):
         if self.myTurn and self.serverGameAPI.IS_GAME_STARTED:
@@ -178,13 +205,16 @@ class newGamePanel(QWidget):
         splittedPositioni = re.split('(\d+)', pawnPosition)
         number = splittedPositioni[1]
         type = splittedPositioni[0]
-        if type == "S" and dice == 6:
+        print("type = " + type + " number = " + number + " dice = " + str(dice))
+        if type == "N":
             canIgo = True
-        elif type == "W" and number + dice < 4:
+        elif (type == "S") and (dice == "6"):
             canIgo = True
+        elif type == "W":
+            canIgo = False
         return canIgo
 
-    def __ifCanibal(self, currentPawn, myPawns, dice):
+    def ifCanibal(self, currentPawn, myPawns, dice):
         canIgo = True
         splittedPositioni = re.split('(\d+)', currentPawn.position)
         number = splittedPositioni[1]
@@ -200,24 +230,24 @@ class newGamePanel(QWidget):
                     canIgo = False
                     break
                 if type == "N":
-                    nowytyp, numbernew = self.__PawnColorTranslationNormal("blue", int(number), dice)
+                    numbernew, nowytyp  = self.__PawnColorTranslationNormal("red", int(number), int(dice))
+                    print(str(nowytyp) + " == " + str(typei) + " and " + str(numbernew) + " == " + str(numberi))
                     if nowytyp == typei and numbernew == int(numberi):
                         canIgo = False
                         break
-                if type == "W" and typei == "W" and int(numberi) == int((number) + dice):
+                if type == "W" and typei == "W" and int(numberi) == int((number) + int(dice)):
                     canIgo = False
                     break
-
             if currentPawn.color == "blue":
                 if type == "S" and typei == "N" and numberi == "10":
                     canIgo = False
                     break
                 if  type== "N":
-                    nowytyp, numbernew = self.__PawnColorTranslationNormal("blue", int(number), dice)
+                    nowytyp, numbernew = self.__PawnColorTranslationNormal("blue", int(number), int(dice))
                     if nowytyp == typei and numbernew == int(numberi):
                         canIgo = False
                         break
-                if type == "W" and typei == "W" and int(numberi) == int((number) + dice):
+                if type == "W" and typei == "W" and int(numberi) == int(int(number) + int(dice)):
                     canIgo = False
                     break
             if currentPawn.color == "green":
@@ -225,11 +255,11 @@ class newGamePanel(QWidget):
                     canIgo = False
                     break
                 if type == "N":
-                    nowytyp, numbernew = self.__PawnColorTranslationNormal("blue", int(number), dice)
+                    nowytyp, numbernew = self.__PawnColorTranslationNormal("green", int(number), int(dice))
                     if nowytyp == typei and numbernew == int(numberi):
                         canIgo = False
                         break
-                if type == "W" and typei == "W" and int(numberi) == int((number) + dice):
+                if type == "W" and typei == "W" and int(numberi) == int(int(number) + int(dice)):
                     canIgo = False
                     break
             if currentPawn.color == "yellow":
@@ -237,47 +267,38 @@ class newGamePanel(QWidget):
                     canIgo = False
                     break
                 if type == "N":
-                    nowytyp, numbernew = self.__PawnColorTranslationNormal("blue", int(number), dice)
+                    nowytyp, numbernew = self.__PawnColorTranslationNormal("yellow", int(number), int(dice))
                     if nowytyp == typei and numbernew == int(numberi):
                         canIgo = False
                         break
-                if type == "W" and typei == "W" and int(numberi) == int((number) + dice):
+                if type == "W" and typei == "W" and int(numberi) == int(int(number) + int(dice)):
                     canIgo = False
                     break
         return canIgo
 
     def __PawnColorTranslationNormal(self,color,number,dice):
+
+
         if color == "red":
-            if number + dice > 39:
-                return (number + dice)%40,"W"
+            if int(number) + int(dice) > 39:
+                return (int(number) + int(dice))%40 + 10,"W"
             else:
-                return (number + dice),"N"
+                return (int(number)+  int(dice)),"N"
         if color == "blue":
-            if number < 10 and number + dice > 9:
-                return (number + dice)%10,"W"
+            if int(number) < 10 and int(number) + int(dice) > 9:
+                return (int(number) + int(dice))%10 + 10,"W"
             else:
-                return (number + dice),"N"
+                return (int(number) + int(dice)),"N"
         if color == "green":
-            if number < 20 and number + dice > 19:
-                return (number + dice)%20,"W"
+            if int(number) < 20 and int(number) + int(dice) > 19:
+                return (int(number) + int(dice))%20 + 10,"W"
             else:
-                return (number + dice),"N"
+                return (int(number) + int(dice)),"N"
         if color == "yellow":
-            if number < 30 and number + dice > 29:
-                return (number + dice)%30,"W"
+            if int(number) < 30 and int(number) + int(dice) > 29:
+                return (int(number) + int(dice))%30 + 10,"W"
             else:
-                return (number + dice),"N"
-
-
-
-
-
-
-
-
-
-
-
+                return (int(number) + int(dice)),"N"
     def __updateView__(self):
         for pawn in self.pawnsArray:
 
