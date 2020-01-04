@@ -90,6 +90,8 @@ class newGamePanel(QWidget):
         self.myRoleSign = QPushButton(self);
         self.myRoleSign.resize(90, 90)
         self.myRoleSign.move(993 // 2 - 50,993 // 2 - 50)
+        self.myRoleSign.clicked.connect(self.skipEvent)
+        self.myRoleSign.setText("SKIP")
     def wait(self, sec=1):
         for n in range(sec * 10):
             QApplication.processEvents()
@@ -109,7 +111,7 @@ class newGamePanel(QWidget):
         elif self.serverGameAPI.COLOR == "G":
             self.myPawns = self.pawnsArray[4:8]
 
-        self.myRoleSign.setStyleSheet("background-color: "+ self.myPawns[0].color + "; border-style: outset; border: 5px solid black; border-radius: 45px;" )
+        self.myRoleSign.setStyleSheet("QPushButton {background-color: "+ self.myPawns[0].color + "; border-style: outset; border: 5px solid black; border-radius: 45px; font-size: 25px} QPushButton:hover:!pressed{ color: "+self.myPawns[0].color+" ;background-color:black;  border-style: outset; border: 5px solid " +self.myPawns[0].color+"; border-radius: 45px; font-size: 25px; }" )
         self.show()
         for i in self.myPawns:
             print(i.position + " " + i.color)
@@ -156,31 +158,119 @@ class newGamePanel(QWidget):
     def pawnEvent(self):
         if self.myTurn and self.serverGameAPI.IS_GAME_STARTED:
             for i in self.myPawns:
-
                 if i.QPushButtonID == self.sender():
-
-
+                    '''canIgo = self.__caIgo(i.color, i.position, self.serverGameAPI.PLAY.dice)
+                    ifCannibal = self.__ifCanibal(i, self.myPawns, self.serverGameAPI.PLAY.dice)
+                    if not (canIgo and ifCannibal):
+                        canIgo = False'''
                     print("Wybrany pionek => " + i.position)
                     print("Moj kolor => " + self.serverGameAPI.COLOR)
-                    '''isKanibal = False
-                    for j in self.myPawns:
-                        splittedPositionj = re.split('(\d+)', j.position)
-                        splittedPositioni = re.split('(\d+)', i.position)
-                        if j == i:
-                            continue
-                        if (int(splittedPositioni[1]) + self.serverGameAPI.PLAY.dice) == int(splittedPositionj[1]) and not (splittedPositionj[0] == "W" or splittedPositionj[0] == "S"):
-                            isKanibal = True
-                        if i.color == 'red' and (int(splittedPositioni[1]) + self.serverGameAPI.PLAY.dice) > 39 and splittedPositionj[0] == "W" and (int(splittedPositioni[1]) + self.serverGameAPI.PLAY.dice)%40 == int(splittedPositionj[1]):
-                            isKanibal = True
-                        if i.color == 'blue' and int(splittedPositioni[1]) < 10 and (int(splittedPositioni[1]) + self.serverGameAPI.PLAY.dice) > 9 and splittedPositionj[0] == "W" and (int(splittedPositioni[1]) + self.serverGameAPI.PLAY.dice)%10 == int(splittedPositionj[1]):
-                            isKanibal = True
-                        if i.color == 'green' and int(splittedPositioni[1]) < 20 and (int(splittedPositioni[1]) + self.serverGameAPI.PLAY.dice) > 19 and splittedPositionj[0] == "W" and (int(splittedPositioni[1]) + self.serverGameAPI.PLAY.dice)%20 == int(splittedPositionj[1]):
-                            isKanibal = True
-                        if i.color == 'yellow' and int(splittedPositioni[1]) < 30 and (int(splittedPositioni[1]) + self.serverGameAPI.PLAY.dice) > 29 and splittedPositionj[0] == "W" and (int(splittedPositioni[1]) + self.serverGameAPI.PLAY.dice)%30 == int(splittedPositionj[1]):
-                            isKanibal = True
-                    if not isKanibal:'''
+                    #if canIgo:
                     self.serverGameAPI.sendMove(i.position)
                     print(self.serverGameAPI.PLAY)
+
+    def skipEvent(self):
+        if self.myTurn and self.serverGameAPI.IS_GAME_STARTED:
+            print("SKIP")
+            self.serverGameAPI.skipMove()
+    def __caIgo(self, pawnColor, pawnPosition, dice):
+        canIgo = False
+        splittedPositioni = re.split('(\d+)', pawnPosition)
+        number = splittedPositioni[1]
+        type = splittedPositioni[0]
+        if type == "S" and dice == 6:
+            canIgo = True
+        elif type == "W" and number + dice < 4:
+            canIgo = True
+        return canIgo
+
+    def __ifCanibal(self, currentPawn, myPawns, dice):
+        canIgo = True
+        splittedPositioni = re.split('(\d+)', currentPawn.position)
+        number = splittedPositioni[1]
+        type = splittedPositioni[0]
+        for i in myPawns:
+            if currentPawn == i:
+                continue
+            splittedPositionj = re.split('(\d+)', i.position)
+            numberi = splittedPositionj[1]
+            typei = splittedPositionj[0]
+            if currentPawn.color == "red":
+                if type == "S" and typei == "N" and numberi == "0":
+                    canIgo = False
+                    break
+                if type == "N":
+                    nowytyp, numbernew = self.__PawnColorTranslationNormal("blue", int(number), dice)
+                    if nowytyp == typei and numbernew == int(numberi):
+                        canIgo = False
+                        break
+                if type == "W" and typei == "W" and int(numberi) == int((number) + dice):
+                    canIgo = False
+                    break
+
+            if currentPawn.color == "blue":
+                if type == "S" and typei == "N" and numberi == "10":
+                    canIgo = False
+                    break
+                if  type== "N":
+                    nowytyp, numbernew = self.__PawnColorTranslationNormal("blue", int(number), dice)
+                    if nowytyp == typei and numbernew == int(numberi):
+                        canIgo = False
+                        break
+                if type == "W" and typei == "W" and int(numberi) == int((number) + dice):
+                    canIgo = False
+                    break
+            if currentPawn.color == "green":
+                if type == "S" and typei == "N" and numberi == "20":
+                    canIgo = False
+                    break
+                if type == "N":
+                    nowytyp, numbernew = self.__PawnColorTranslationNormal("blue", int(number), dice)
+                    if nowytyp == typei and numbernew == int(numberi):
+                        canIgo = False
+                        break
+                if type == "W" and typei == "W" and int(numberi) == int((number) + dice):
+                    canIgo = False
+                    break
+            if currentPawn.color == "yellow":
+                if type == "S" and typei == "N" and numberi == "30":
+                    canIgo = False
+                    break
+                if type == "N":
+                    nowytyp, numbernew = self.__PawnColorTranslationNormal("blue", int(number), dice)
+                    if nowytyp == typei and numbernew == int(numberi):
+                        canIgo = False
+                        break
+                if type == "W" and typei == "W" and int(numberi) == int((number) + dice):
+                    canIgo = False
+                    break
+        return canIgo
+
+    def __PawnColorTranslationNormal(self,color,number,dice):
+        if color == "red":
+            if number + dice > 39:
+                return (number + dice)%40,"W"
+            else:
+                return (number + dice),"N"
+        if color == "blue":
+            if number < 10 and number + dice > 9:
+                return (number + dice)%10,"W"
+            else:
+                return (number + dice),"N"
+        if color == "green":
+            if number < 20 and number + dice > 19:
+                return (number + dice)%20,"W"
+            else:
+                return (number + dice),"N"
+        if color == "yellow":
+            if number < 30 and number + dice > 29:
+                return (number + dice)%30,"W"
+            else:
+                return (number + dice),"N"
+
+
+
+
 
 
 
