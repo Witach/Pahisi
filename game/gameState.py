@@ -33,7 +33,7 @@ class GameState:
         print("Kolor: ",color)
         newPosition = self.addStepsToPositon(position, steps,color)
         if self.__checkForWinPlace(tpawn, newPosition):
-            tpawn.position = self.__generateEmptyPlace(tpawn, WIN_POSITION)
+            tpawn.position = self.__generateEmptyPlace(tpawn.color, WIN_POSITION)
             return
         if self.__checkForFight(newPosition):
             epawn = self.__findPawnByPosition(newPosition)
@@ -62,10 +62,9 @@ class GameState:
 
     def __checkForWinPlace(self, pawn: Pawn, newPosition: Position) -> bool:
         if pawn.position.typeOfPosition == NORMAL_POSITION:
-            if newPosition.number > WIN_PLACES[pawn.color] >= pawn.position.number:
-                if not pawn.passedThroughStart:
-                    pawn.passedThroughStart = True
-                    return False
+            if (pawn.color == RED and  pawn.position.number > newPosition.number):
+                return True
+            elif newPosition.number >= WIN_PLACES[pawn.color] + 1 > pawn.position.number  and pawn.position.number < newPosition.number :
                 return True
         return False
 
@@ -84,10 +83,14 @@ class GameState:
 
     def checkForWinner(self):
         for k in self.dictOfPlayers.keys():
+            w = 0
             for i in self.dictOfPlayers[k].pawns:
                 if i.position.typeOfPosition == WIN_POSITION:
+                    w +=1
+                if w == 4:
                     return k
         return None
+
 
     def __nextTurnGenerator(self):
         while True:

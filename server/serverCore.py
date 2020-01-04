@@ -9,6 +9,7 @@ HOST = '127.0.0.1'
 PORT = 65432
 ENCODING = "UTF-8"
 #R[S1,S2,S3]$
+TEST = True
 
 def run():
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
@@ -21,6 +22,10 @@ def gameLogic(sock):
     dictOfSockets = preparePlayers(sock)
     print("players are prepared")
     play = GameState()
+
+    if TEST :
+        testInit(play)
+
     print("game is made")
     bytesOfMessage = bytes(START_MESSAGE, ENCODING)
     print(bytesOfMessage)
@@ -51,6 +56,13 @@ def gameLogic(sock):
     bytesOfMessage = bytes(WIN_MESSAGE.format(turn=play.checkForWinner()[0]))
     for i in [RED, GREEN, BLUE, YELLOW]:
         dictOfSockets[i].send(bytesOfMessage)
+
+def testInit(play):
+    if TEST:
+        play.dictOfPlayers[RED].pawns[0].position.number = 39
+        play.dictOfPlayers[RED].pawns[0].position.typeOfPosition = NORMAL_POSITION
+        play.dictOfPlayers[BLUE].pawns[0].position.number = 9
+        play.dictOfPlayers[BLUE].pawns[0].position.typeOfPosition = NORMAL_POSITION
 
 def preparePlayers(sock):
     dictOfSockets = {}
