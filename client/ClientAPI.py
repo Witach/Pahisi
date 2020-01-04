@@ -5,6 +5,7 @@ import threading
 class API():
 
     MOVE_MESSAGE = "MOVE;{position}"
+    SKIP_MESSAGE = "SKIP"
     SEPARATOR = ";"
     IS_GAME_STARTED = False;
     HOST = '127.0.0.1'
@@ -87,6 +88,10 @@ class API():
 
     def sendMove(self,position):
         bytesOfMessage = bytes(self.MOVE_MESSAGE.format(position=position),"UTF-8")
+        self.SOCK.send(bytesOfMessage)
+
+    def skipMove(self):
+        bytesOfMessage = bytes(self.SKIP_MESSAGE, "UTF-8")
         self.SOCK.send(bytesOfMessage)
 
     def __startfun(self):

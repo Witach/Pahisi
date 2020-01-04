@@ -18,10 +18,10 @@ START_PLACES = {RED: ID_OF_RED,
                 YELLOW: ID_OF_YELLOW
                 }
 
-WIN_PLACES = {RED: 0,
-              BLUE: ID_OF_BLUE,
-              GREEN: ID_OF_GREEN,
-              YELLOW: ID_OF_YELLOW
+WIN_PLACES = {RED: 39,
+              BLUE: ID_OF_BLUE - 1,
+              GREEN: ID_OF_GREEN - 1,
+              YELLOW: ID_OF_YELLOW - 1
               }
 
 
