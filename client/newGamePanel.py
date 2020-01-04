@@ -109,7 +109,7 @@ class newGamePanel(QWidget):
         elif self.serverGameAPI.COLOR == "G":
             self.myPawns = self.pawnsArray[4:8]
 
-        self.myRoleSign.setStyleSheet("background-color: "+ self.myPawns[0].color)
+        self.myRoleSign.setStyleSheet("background-color: "+ self.myPawns[0].color + "; border-style: outset; border: 5px solid black; border-radius: 45px;" )
         self.show()
         for i in self.myPawns:
             print(i.position + " " + i.color)
