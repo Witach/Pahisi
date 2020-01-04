@@ -15,23 +15,24 @@ class GameState:
 
     def __str__(self):
 
-        self.__getpawns()
+        self.getpawns()
         return str(self.dictOfPlayers[RED]) + \
                str(self.dictOfPlayers[GREEN]) + \
                str(self.dictOfPlayers[YELLOW]) + \
                str(self.dictOfPlayers[BLUE])
 
-    def __getpawns(self):
+    def getpawns(self):
         return [x for i in [self.dictOfPlayers[RED], self.dictOfPlayers[GREEN], self.dictOfPlayers[YELLOW],
                             self.dictOfPlayers[BLUE]] for x in i.pawns]
 
     # TODO pola źle się dodają i typ się nie zmienia
-    def tryToReplacePawn(self, position, steps):
-        tpawn = self.__findPawnByPosition(position)
+    def tryToReplacePawn(self, position, steps,color):
+        tpawn = self.__findPawn(Pawn(color,position.number,position.typeOfPosition,START_PLACES[color]))
         print("Typ position: ",type(position.number))
         print("Typ steps: ",type(steps))
+        print("Kolor: ",color)
         newPosition = Position(int(position.number) + int(steps), position.typeOfPosition)
-        if self.__checkForWinPlace(tpawn, newPosition):
+        if self.__checkForWinPlace(tpawn, newPosition) and tpawn.position.typeOfPosition == NORMAL_POSITION:
             tpawn.position = self.__generateEmptyPlace(tpawn, WIN_POSITION)
             return
         if tpawn.position.typeOfPosition == START_POSITION:
@@ -48,8 +49,18 @@ class GameState:
                 return pawn
         return None
 
-    def __checkForWinPlace(self, pawn, newPosition):
-        return (pawn.position.number + newPosition.number) > WIN_PLACES[pawn.color]
+    def __findPawn(self, searchedPawn):
+        for pawn in self.pawns:
+            if pawn == searchedPawn:
+                return pawn
+        return None
+
+    def __checkForWinPlace(self, pawn: Pawn, newPosition: Position) -> bool:
+        if newPosition.number > WIN_PLACES[pawn.color] >= pawn.position.number:
+            if not pawn.passedThroughStart:
+                pawn.passedThroughStart = True
+                return False
+            return True
 
     def __checkForFight(self, newPosition):
         return not self.__findPawnByPosition(newPosition) is None
@@ -87,7 +98,7 @@ class GameState:
 
 
     def __updatePawns(self):
-        self.pawns = self.__getpawns()
+        self.pawns = self.getpawns()
     #R[S1,W2,N3,S2]Y[]B[]G[]
 
 def parseToGameState(text):

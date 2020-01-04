@@ -6,6 +6,7 @@ class Pawn:
     position = ""
     color = ""
     idOfStartPlace = 0
+    passedThroughStart = False
 
     def __init__(self, color,position, typeOfPisition,startPlace):
         self.color = color

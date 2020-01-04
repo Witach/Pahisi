@@ -46,7 +46,7 @@ def gameLogic(sock):
             continue
         MOVE = parseToMove(DATA)
         print("try to move pawn")
-        play.tryToReplacePawn(MOVE,DICE)
+        play.tryToReplacePawn(MOVE,DICE,COLOR)
     print("server sends info about who is the winner")
     bytesOfMessage = bytes(WIN_MESSAGE.format(turn=play.checkForWinner()[0]))
     for i in [RED, GREEN, BLUE, YELLOW]:

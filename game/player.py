@@ -9,19 +9,19 @@ GREEN = "G"
 
 ID_OF_RED = 0
 ID_OF_BLUE = 10
-ID_OF_YELLOW = 20
-ID_OF_GREEN = 30
+ID_OF_GREEN = 20
+ID_OF_YELLOW = 30
 
 START_PLACES = {RED: ID_OF_RED,
                 BLUE: ID_OF_BLUE,
-                YELLOW: ID_OF_YELLOW,
-                GREEN: ID_OF_GREEN
+                GREEN: ID_OF_GREEN,
+                YELLOW: ID_OF_YELLOW
                 }
 
-WIN_PLACES = {RED: 39,
+WIN_PLACES = {RED: 0,
               BLUE: ID_OF_BLUE,
-              YELLOW: ID_OF_YELLOW,
-              GREEN: ID_OF_GREEN
+              GREEN: ID_OF_GREEN,
+              YELLOW: ID_OF_YELLOW
               }
 
 
